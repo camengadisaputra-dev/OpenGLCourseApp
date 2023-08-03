@@ -1,21 +1,34 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-const GLint WIDTH = 800, HEIGHT = 800;
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-GLuint VAO, VBO, shader;
+const GLint WIDTH = 800, HEIGHT = 600;
+const float toRadians = (22.0f/7.0f) / 180.0f;
+
+GLuint VAO, VBO, shader, uniformModel;
+
+bool direction = true;
+float triOffset = 0.0f;
+float triMaxOffset = 0.7f;
+float triIncrement = 0.005f;
 
 // Vertex Shader
-static const char* vShader = "                                  \n\
-#version 330                                                    \n\
-                                                                \n\
-layout (location = 0) in vec3 pos;                              \n\
-                                                                \n\
-void main() {                                                   \n\
-    gl_Position = vec4(0.4 * pos.x, 0.4 * pos.y, pos.z, 1.0); \n\
+static const char* vShader = "                                      \n\
+#version 330                                                        \n\
+                                                                    \n\
+layout (location = 0) in vec3 pos;                                  \n\
+                                                                    \n\
+uniform mat4 model;                                                 \n\
+                                                                    \n\
+void main() {                                                       \n\
+    gl_Position = model * vec4(pos, 1.0); \n\
 }";
 
 // Fragment Shader
@@ -108,6 +121,8 @@ void CompileShaders() {
         printf("Error validate program: '%s'\n", eLog);
         return;
     }
+
+    uniformModel = glGetUniformLocation(shader, "model");
 }
 
 
@@ -158,17 +173,38 @@ int main()
 
     CreateTriangle();
     CompileShaders();
-
+    int rotation = 0;
+    float scale = 0.4f;
     //Loop until window close
     while (!glfwWindowShouldClose(mainWindow)) {
         // Get + Hanlde user input events
         glfwPollEvents();
+
+        if (direction) {
+            triOffset += triIncrement;
+        }
+        else {
+            triOffset -= triIncrement;
+        }
+
+        if (fabs(triOffset) >= triMaxOffset) {
+            direction = !direction;
+        }
+
+        rotation = (rotation + 1) % 360;
 
         // Clear window
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shader);
+
+        glm::mat4 model(1.0f);
+        model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
+        model = glm::rotate(model, rotation * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(scale, scale, 1.0f));
+
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
