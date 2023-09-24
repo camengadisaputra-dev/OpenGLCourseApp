@@ -70,6 +70,10 @@ void Camera::update() {
 	up = glm::normalize(glm::cross(right, front));
 }
 
+glm::vec3 Camera::getCameraPosition() {
+	return position;
+}
+
 
 Camera::~Camera() {
 
