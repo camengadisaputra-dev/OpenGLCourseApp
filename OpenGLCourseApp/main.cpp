@@ -155,11 +155,11 @@ int main()
 	unsigned int pointLightCount = 0;
 	pointLights[0] = PointLight(0.0f, 0.0f, 1.0f,
 								0.1f, 1.0f,
-								0.0f, 0.0f, 0.0f,
+								4.0f, 0.0f, 0.0f,
 								0.3f, 0.2f, 0.1f);
 	pointLightCount++;
 
-	pointLights[1] = PointLight(0.0f, 1.0f, 0.0f,
+	pointLights[1] = PointLight(1.0f, 0.0f, 0.0f,
 								0.1f, 1.0f,
 								-4.0f, 0.0f, 0.0f,
 								0.3f, 0.2f, 0.1f);
@@ -195,7 +195,7 @@ int main()
 		uniformShininess = shaderList[0].GetShininessLocation();
 
 		shaderList[0].SetDirectionalLight(&mainLight);
-		shaderList[0].SetPointLight(pointLights, pointLightCount);
+		shaderList[0].SetPointLights(pointLights, pointLightCount);
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
